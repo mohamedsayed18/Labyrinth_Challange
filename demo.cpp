@@ -1,12 +1,13 @@
-
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
 int maxi = 100;
 int row = 0;
 int col = 0;
+
 
 vector<vector<int>> path{
   {0, 1, 0, 0},
@@ -29,7 +30,7 @@ vector<vector<int>> visited{
 {1, 0, 0, 1}
 };
 
-void algo()
+int algo()
 {
    // read the input txt
    //create weights vector, set all possible to zero
@@ -71,14 +72,41 @@ void neighbours(int i, int j)
 }
    
    
+bool check(vector<vector<int>> v)
+{
+    for (int i=0; i<4; i++)
+    {
+        for (int j = 0; j < 4; j++) {
+            if (v[i][j] == 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+   
 
+void back_track()
+{
+    
+}
 int main()
 {
-   //find heighst not visited
-    //algo();
-    // assign neighbours
-   neighbours(1,2);
-   cout<<weights[1][1]<<endl;
-   cout<<weights[2][2]<<endl;
+    bool done = false;
+    while(!done)
+    {
+        //find heighst not visited
+        algo();
+        // assign neighbours
+        neighbours(row, col);
+        done = check(visited);
+    }
+    
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            cout << weights[i][j];
+        }
+        cout << '\n';
+    }
     return 0;
 }
