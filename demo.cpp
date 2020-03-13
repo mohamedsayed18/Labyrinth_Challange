@@ -18,65 +18,58 @@ vector<vector<int>> path;
 vector<vector<int>> weights;
 vector<vector<int>> visited;
 
-void set_all()
-{
+void set_all(){
+    /* 
+    create 2 vectors
+    visited: represent if the point is visited or not
+    weights: contain the weight of each point in the path
+    */
     visited = path;
     weights = path;
    
-    for (int i = 0; i < path.size(); i++)
-    {
-        for (int j = 0; j < path[0].size(); j++)
-        {
-            if(path[i][j] == 1){
-                weights[i][j] = 0;
-                visited[i][j] = 0;
-            }   
+    for (int i = 0; i < path.size(); i++){
+        for (int j = 0; j < path[0].size(); j++){
+            weights[i][j] = 0;
         } 
     } 
 }
 
-vector<int> algo()
-{
-   // read the input txt
-   //create weights vector, set all possible to zero
-       //two step algorithm
-   //find the highest and not visited
+vector<int> algo(){
+   /*find the highest and not visited*/
+   // variables to carry the max value, row, and column
    int maxi = 100;
    int max_row = 0;
    int max_col = 0;
 
-   for(int i=0; i<path.size(); i++)
-   {
-      for(int j=0; j<path[0].size(); j++)
-      {
-         if(path[i][j])
-         {
-            if ( (weights[i][j]>maxi || maxi==100) && (!visited[i][j]) )
+   for(int i=0; i<path.size(); i++){
+      for(int j=0; j<path[0].size(); j++){
+        if(path[i][j])  // the point is available or a wall
+        {  // the point has the max value and not visited
+            if ( (weights[i][j]>maxi || maxi==100) && (visited[i][j]!=0) )  
             {
                maxi = weights[i][j];
                max_row = i;
                max_col = j;
             }
-         }
-      }
-   }
-    //cout<<max_row<<max_col<<endl;
+        }
+    }
+}
     return vector<int>{max_row, max_col};
 }
 
 void neighbours(int i, int j)
 {
-   visited[i][j] = 1;
+   visited[i][j] = 0;
    //cout<<i<<j<<endl;
    direction[weights[i][j]] = pair<int,int>(i,j);
    for(int x=-1; x<=1; x+=2)
    {  //todo check if the current weight is higher
-      if (i+x>=0 && i+x<5 && path[i+x][j] && !visited[i+x][j])
+      if (i+x>=0 && i+x<5 && path[i+x][j] && visited[i+x][j] != 0)
       {
          weights[i+x][j] = weights[i][j] + 1;
          //direction[weights[i+x][j]] = pair<int,int>(i+x,j);
       }
-      if (j+x>=0 && j+x<7 && path[i][j+x] && !visited[i][j+x])
+      if (j+x>=0 && j+x<7 && path[i][j+x] && visited[i][j+x]!= 0)
       {
          weights[i][j+x] = weights[i][j] + 1;
          //direction[weights[i][j+x]] = pair<int,int>(i,j+x);
@@ -88,9 +81,10 @@ void neighbours(int i, int j)
    
 bool check(vector<vector<int>> v)
 {
+    /*check if all possible points were visited*/
     for (int i=0; i<5; i++){
         for (int j = 0; j < 7; j++) {
-            if (path[i][j] == 1 && visited[i][j] ==0) {
+            if (path[i][j] == 1 && visited[i][j] ==1) {
                 return false;
             }
         }
@@ -111,16 +105,28 @@ vector<vector<char>> back_track(vector<vector<int>> v)
 {
     vector<int> maxe;
     vector<vector<char>> fin;
-    vector<char> w(v[0].size(), '#');
-    for (int i = 0; i < 5; i++){
+    vector<char> w;
+    for (int i = 0; i < v.size(); i++){
+        for (int j = 0; j < v[0].size(); j++){
+            if (path[i][j] == 1)
+            {
+                w.push_back('.');
+            }
+            else
+            {
+                w.push_back('#');
+            }
+        }
         fin.push_back(w);
+        w.clear();
     }
+    
     //find the max element
     for (int i = 0; i < v.size(); i++) {
         maxe.push_back(*max_element(v[i].begin(), v[i].end()));
     }
     int emax = *max_element(maxe.begin(), maxe.end());
-
+    cout<<emax+1<<endl;
 /*    row = ((*direction.find(7)).second).first;
     col = ((*direction.find(7)).second).second;
     cout<<row<<"what"<<col;
@@ -130,15 +136,18 @@ vector<vector<char>> back_track(vector<vector<int>> v)
         row = ((*direction.find(emax)).second).first;
         col = ((*direction.find(emax)).second).second;
         fin[row][col] = '0' + emax;
-        cout<<emax<<endl;
+        //cout<<emax<<endl;
         emax --;
     }
    
     return fin;
 }
 
-vector<vector<int>> read_file(){
-    ifstream file("data.txt");
+vector<vector<int>> read_file(string s){
+    /* param s: name of the file
+       return way: 2D vector representing available points
+    */
+    ifstream file(s);
     string line;
     
     vector<int> one;
@@ -161,36 +170,72 @@ vector<vector<int>> read_file(){
     return way;
 }
 
+vector<vector<char>> back2(vector<vector<int>> v){
+    //find max element
+    vector<int> maxe;
+    vector<vector<char>> fin;
+    vector<char> w;
+    for (int i = 0; i < v.size(); i++)
+    {
+        for (int j = 0; j < v[0].size(); j++)
+        {
+            if (path[i][j] == 1)
+            {
+                w.push_back('.');
+            }
+            else
+            {
+                w.push_back('#');
+            }
+        }
+        fin.push_back(w);
+        w.clear();
+    }
+
+    // max element row, col and value 
+    auto it = max_element(v.begin(), v.end());
+    int row = it - v.begin();
+    auto it2 = max_element(v[row].begin(), v[row].end());
+    int col = (it2 - v[row].begin());
+    int emax = *it2;
+    cout<<emax+1<<endl;
+    fin[row][col] = '0' + emax;
+   
+    while (emax>0)
+    {
+        emax --;
+        for(int x=-1; x<=1; x+=2)
+        {
+            if (v[row+x][col]==emax && row+x>=0 && row+x<5)
+            {
+                fin[row+x][col] = '0' + emax;
+                row = row+x;
+                break;
+            }
+            else if (v[row][col+x]==emax && col+x>=0 && col+x<7)
+            {
+                fin[row][col+x] = '0' + emax;
+                col = col+x;
+                break;
+            }
+        }
+           
+    }
+    
+    return fin;
+}
+
 
 int main()
 {
+    path = read_file("data2.txt"); //read the data from data.txt
+    set_all();  // initize the weights with zeros
     
-    path = read_file();
-    set_all();
-    
-    vector<int> pos ;
-/*  
-    pos = algo();
-    neighbours(pos[0], pos[1]);
-    printvector(weights);
-    pos = algo();
-    neighbours(pos[0], pos[1]);
-    printvector(weights);
-    pos = algo();
-    neighbours(pos[0], pos[1]);
-    printvector(weights);
-
-    pos = algo();
-    neighbours(pos[0], pos[1]);
-    printvector(weights);
-    printvector(visited);
-    //cout<<"visited"<<endl;
-    //printvector(visited);
-    //cout<<"weights"<<endl;
-    //printvector(weights);
- */
+    vector<int> pos;
     bool done = false;
+    // the algorithm
     while (! done)
+    //for (int i = 0; i < 9; i++)
     {
         //find heighst not visited
         vector<int> pos = algo();    
@@ -200,11 +245,8 @@ int main()
         //cout<<done<<endl;
     }
     
-    //printvector(weights);
-    //back_track(weights);
-    vector<vector<char>> f = back_track(weights);
+    vector<vector<char>> f = back2(weights);
     printvector(f);
-
     return 0;
 
 }
