@@ -7,13 +7,6 @@
 
 using namespace std;
 
-//int maxi = 100;
-int row = 0;
-int col = 0;
-
-map<int, pair<int, int>> direction;
-//vector<vector<int>> way;
-
 vector<vector<int>> path;
 vector<vector<int>> weights;
 vector<vector<int>> visited;
@@ -34,8 +27,13 @@ void set_all(){
     } 
 }
 
+
 vector<int> algo(){
-   /*find the highest and not visited*/
+   /*find the highest and not visited
+   return the vector (max_row, max_col)
+   max_row: max element row position
+   max_col: max element col position
+   */
    // variables to carry the max value, row, and column
    int maxi = 100;
    int max_row = 0;
@@ -57,34 +55,30 @@ vector<int> algo(){
     return vector<int>{max_row, max_col};
 }
 
+
 void neighbours(int i, int j)
 {
    visited[i][j] = 0;
-   //cout<<i<<j<<endl;
-   direction[weights[i][j]] = pair<int,int>(i,j);
    for(int x=-1; x<=1; x+=2)
-   {  //todo check if the current weight is higher
+   {  // assign weights to up and down
       if (i+x>=0 && i+x<5 && path[i+x][j] && visited[i+x][j] != 0)
       {
          weights[i+x][j] = weights[i][j] + 1;
-         //direction[weights[i+x][j]] = pair<int,int>(i+x,j);
       }
       if (j+x>=0 && j+x<7 && path[i][j+x] && visited[i][j+x]!= 0)
-      {
+      {  //assign weights to right and left
          weights[i][j+x] = weights[i][j] + 1;
-         //direction[weights[i][j+x]] = pair<int,int>(i,j+x);
       }
    }
-   //cout<<"done"<<endl;
 }
    
    
 bool check(vector<vector<int>> v)
 {
     /*check if all possible points were visited*/
-    for (int i=0; i<5; i++){
-        for (int j = 0; j < 7; j++) {
-            if (path[i][j] == 1 && visited[i][j] ==1) {
+    for (int i=0; i<v.size(); i++){
+        for (int j = 0; j < v[0].size(); j++) {
+            if (path[i][j] == 1 && v[i][j] ==1) {
                 return false;
             }
         }
@@ -93,6 +87,7 @@ bool check(vector<vector<int>> v)
 }
    
 void printvector(vector<vector<char>> v){
+    /* print matrix v*/
     for (int i = 0; i < v.size(); i++) {
         for (int j = 0; j < v[0].size(); j++) {
             cout << v[i][j];
@@ -101,51 +96,11 @@ void printvector(vector<vector<char>> v){
     }
 }
 
-vector<vector<char>> back_track(vector<vector<int>> v)
-{
-    vector<int> maxe;
-    vector<vector<char>> fin;
-    vector<char> w;
-    for (int i = 0; i < v.size(); i++){
-        for (int j = 0; j < v[0].size(); j++){
-            if (path[i][j] == 1)
-            {
-                w.push_back('.');
-            }
-            else
-            {
-                w.push_back('#');
-            }
-        }
-        fin.push_back(w);
-        w.clear();
-    }
-    
-    //find the max element
-    for (int i = 0; i < v.size(); i++) {
-        maxe.push_back(*max_element(v[i].begin(), v[i].end()));
-    }
-    int emax = *max_element(maxe.begin(), maxe.end());
-    cout<<emax+1<<endl;
-/*    row = ((*direction.find(7)).second).first;
-    col = ((*direction.find(7)).second).second;
-    cout<<row<<"what"<<col;
-*/    
-    while (emax >= 0)
-    {
-        row = ((*direction.find(emax)).second).first;
-        col = ((*direction.find(emax)).second).second;
-        fin[row][col] = '0' + emax;
-        //cout<<emax<<endl;
-        emax --;
-    }
-   
-    return fin;
-}
 
 vector<vector<int>> read_file(string s){
     /* param s: name of the file
        return way: 2D vector representing available points
+       '#' --> 0   and  '.' --> 1
     */
     ifstream file(s);
     string line;
@@ -170,11 +125,13 @@ vector<vector<int>> read_file(string s){
     return way;
 }
 
+
 vector<vector<char>> back2(vector<vector<int>> v){
-    //find max element
+    /* back track to display the world */
     vector<int> maxe;
     vector<vector<char>> fin;
     vector<char> w;
+    //create matrix with # and . 
     for (int i = 0; i < v.size(); i++)
     {
         for (int j = 0; j < v[0].size(); j++)
@@ -198,9 +155,11 @@ vector<vector<char>> back2(vector<vector<int>> v){
     auto it2 = max_element(v[row].begin(), v[row].end());
     int col = (it2 - v[row].begin());
     int emax = *it2;
-    cout<<emax+1<<endl;
+
+    cout<<emax+1<<endl; // the value of the steps
     fin[row][col] = '0' + emax;
    
+    // from the max to 0 assign the values in fin matrix
     while (emax>0)
     {
         emax --;
@@ -221,7 +180,6 @@ vector<vector<char>> back2(vector<vector<int>> v){
         }
            
     }
-    
     return fin;
 }
 
@@ -233,20 +191,15 @@ int main()
     
     vector<int> pos;
     bool done = false;
-    // the algorithm
     while (! done)
-    //for (int i = 0; i < 9; i++)
     {
         //find heighst not visited
         vector<int> pos = algo();    
-        // assign neighbours
+        // assign weights to neighbours
         neighbours(pos[0], pos[1]);
         done = check(visited);
-        //cout<<done<<endl;
     }
-    
     vector<vector<char>> f = back2(weights);
-    printvector(f);
+    printvector(f);     //display the vectors
     return 0;
-
 }
